@@ -1,4 +1,4 @@
-# Hygeia-Nexus 🏥
+# Medi-Bridge 🏥
 
 ## Comprehensive Hospital Management System
 
@@ -310,7 +310,7 @@ Follow the detailed guide in [GEMINI_API_SETUP.md](./GEMINI_API_SETUP.md) to con
 ## 📁 Project Structure
 
 ```
-hygeia-nexus/
+medi-bridge/
 ├── 📁 client/                          # React Frontend Application
 │   ├── 📁 public/                      # Static assets and animations
 │   │   ├── 📁 images/                  # Image assets
@@ -653,9 +653,9 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 ### Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/hygeia-nexus/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/hygeia-nexus/discussions)
-- **Documentation**: [Wiki](https://github.com/yourusername/hygeia-nexus/wiki)
+- **Issues**: [GitHub Issues](https://github.com/Venkateswarlu41/Medi-Bridge/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Venkateswarlu41/Medi-Bridge/discussions)
+- **Documentation**: [Wiki](https://github.com/Venkateswarlu41/Medi-Bridge/wiki)
 - **Email**: support@medi-bridge.com
 
 ### Additional Resources
@@ -681,4 +681,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for better healthcare management**
 
-_Hygeia-Nexus - Connecting Healthcare, Empowering Lives_#
+_Medi-Bridge - Connecting Healthcare, Empowering Lives_#
