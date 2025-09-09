@@ -1,0 +1,793 @@
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import {
+  Save,
+  Plus,
+  Trash2,
+  Upload,
+  ArrowLeft,
+  CheckCircle,
+  AlertTriangle
+} from "react-feather";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { format, parseISO } from "date-fns";
+import { hasAnyRole } from "../utils/auth";
+import { labTestService } from "../services/labTest.service";
+
+const SmallButton = styled(motion.button)`
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  &:hover {
+    background: #f56565;
+    color: white;
+    transform: scale(1.05);
+  }
+`;
+
+const PageContainer = styled.div`
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const DetailCard = styled(motion.div)`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+`;
+
+const ResultsSection = styled.section`
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #e2e8f0;
+`;
+
+const SectionTitle = styled.h3`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  margin-bottom: 20px;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 15px;
+`;
+
+const FormLabel = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+`;
+
+const FormInput = styled.input`
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  &:focus {
+    border-color: #4299e1;
+    outline: none;
+  }
+`;
+
+const FormTextarea = styled.textarea`
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 100px;
+  resize: vertical;
+  &:focus {
+    border-color: #4299e1;
+    outline: none;
+  }
+`;
+
+const FormSelect = styled.select`
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  &:focus {
+    border-color: #4299e1;
+    outline: none;
+  }
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+`;
+
+const ResultsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const ResultItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+`;
+
+const ResultInfo = styled.div`
+  flex: 1;
+`;
+
+const ResultName = styled.div`
+  font-weight: 600;
+  margin-bottom: 4px;
+`;
+
+const ResultDetails = styled.div`
+  font-size: 14px;
+  color: #4a5568;
+`;
+
+const ActionButton = styled(motion.button)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background: ${props => {
+    switch (props.className) {
+      case "primary":
+        return "#4299e1";
+      case "success":
+        return "#48bb78";
+      case "danger":
+        return "#f56565";
+      case "secondary":
+      default:
+        return "#edf2f7";
+    }
+  }};
+  color: ${props => (props.className === "secondary" ? "#4a5568" : "white")};
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const BackButton = styled(motion.button)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  background: #edf2f7;
+  color: #4a5568;
+  margin-bottom: 20px;
+  cursor: pointer;
+`;
+
+function LabTestDetail() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [labTest, setLabTest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [newResult, setNewResult] = useState({
+    parameter: "",
+    value: "",
+    unit: "",
+    status: "normal",
+    normalRange: "",
+  });
+  const [results, setResults] = useState([]);
+  const [interpretation, setInterpretation] = useState("");
+  const [conclusion, setConclusion] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewComments, setReviewComments] = useState("");
+  const [reviewAction, setReviewAction] = useState("");
+
+  useEffect(() => {
+    fetchLabTestDetail();
+  }, [id]);
+
+  const fetchLabTestDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await labTestService.getLabTestById(id);
+      if (response.success) {
+        setLabTest(response.data);
+        if (response.data.results) {
+          setResults(response.data.results);
+        }
+      } else {
+        toast.error("Failed to load lab test details");
+        navigate("/lab-tests");
+      }
+    } catch (error) {
+      console.error("Fetch lab test error:", error);
+      toast.error("Failed to load lab test details");
+      navigate("/lab-tests");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddResult = () => {
+    if (!newResult.parameter || !newResult.value) {
+      toast.error("Parameter and value are required");
+      return;
+    }
+    setResults([...results, { ...newResult }]);
+    setNewResult({
+      parameter: "",
+      value: "",
+      unit: "",
+      status: "normal",
+      normalRange: "",
+    });
+  };
+
+  const handleRemoveResult = (index) => {
+    setResults(results.filter((_, i) => i !== index));
+  };
+
+  const handleSubmitResults = async () => {
+    if (results.length === 0) {
+      toast.error("Please add at least one result");
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const formData = {
+        results,
+        interpretation,
+        conclusion,
+        recommendations,
+      };
+      const result = await labTestService.updateLabTest(id, formData);
+      if (result.success) {
+        toast.success("Results submitted successfully");
+        navigate("/lab-tests");
+      } else {
+        toast.error(result.message || "Failed to submit results");
+      }
+    } catch (error) {
+      console.error("Submit results error:", error);
+      toast.error("Failed to submit results");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleReviewTest = async () => {
+    if (!reviewComments) {
+      toast.error("Review comments are required");
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const result = await labTestService.reviewLabTest(id, {
+        comments: reviewComments,
+        actionTaken: reviewAction,
+      });
+      if (result.success) {
+        toast.success("Review submitted successfully");
+        await fetchLabTestDetail();
+      } else {
+        toast.error(result.message || "Failed to submit review");
+      }
+    } catch (error) {
+      console.error("Review test error:", error);
+      toast.error("Failed to submit review");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!newResult.image) {
+      toast.error("Please upload an image");
+      return;
+    }
+    setUpdating(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", newResult.image);
+      formData.append("interpretation", interpretation);
+      formData.append("conclusion", conclusion);
+      formData.append("recommendations", recommendations);
+      const result = await labTestService.uploadLabResults(id, formData, true);
+      if (result.success) {
+        toast.success("Image and results uploaded successfully");
+        fetchLabTestDetail();
+      } else {
+        toast.error(result.message || "Failed to upload results");
+      }
+    } catch (error) {
+      console.error("Upload results error:", error);
+      toast.error("Failed to upload results");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageContainer>
+        <div>Loading...</div>
+      </PageContainer>
+    );
+  }
+
+  return (
+    <PageContainer>
+      <BackButton
+        onClick={() => navigate("/lab-tests")}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <ArrowLeft size={16} />
+        Back to Lab Tests
+      </BackButton>
+
+      <DetailCard
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Header>
+          <div>
+            <h2>{labTest?.patientName}</h2>
+            <p>Test Type: {labTest?.testType}</p>
+          </div>
+          <div>
+            <p>Status: {labTest?.status}</p>
+            <p>Date: {new Date(labTest?.date).toLocaleDateString()}</p>
+          </div>
+        </Header>
+
+        {/* Results Section */}
+        {hasAnyRole(["lab_technician"]) && labTest?.status === "in-progress" && (
+          <ResultsSection>
+            <SectionTitle>
+              <Upload size={20} />
+              Test Results
+            </SectionTitle>
+
+            {/* Parameter-based test form */}
+            {!labTest?.testType?.toLowerCase().includes("imaging") && (
+              <>
+                <FormGrid>
+                  <FormGroup>
+                    <FormLabel>Parameter</FormLabel>
+                    <FormInput
+                      type="text"
+                      value={newResult.parameter}
+                      onChange={(e) =>
+                        setNewResult({ ...newResult, parameter: e.target.value })
+                      }
+                      placeholder="e.g., Hemoglobin"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <FormLabel>Value</FormLabel>
+                    <FormInput
+                      type="text"
+                      value={newResult.value}
+                      onChange={(e) =>
+                        setNewResult({ ...newResult, value: e.target.value })
+                      }
+                      placeholder="e.g., 12.5"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <FormLabel>Unit</FormLabel>
+                    <FormInput
+                      type="text"
+                      value={newResult.unit}
+                      onChange={(e) =>
+                        setNewResult({ ...newResult, unit: e.target.value })
+                      }
+                      placeholder="e.g., g/dL"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <FormLabel>Status</FormLabel>
+                    <FormSelect
+                      value={newResult.status}
+                      onChange={(e) =>
+                        setNewResult({ ...newResult, status: e.target.value })
+                      }
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="abnormal">Abnormal</option>
+                      <option value="critical">Critical</option>
+                      <option value="inconclusive">Inconclusive</option>
+                    </FormSelect>
+                  </FormGroup>
+                </FormGrid>
+
+                <FormGroup>
+                  <FormLabel>Normal Range</FormLabel>
+                  <FormInput
+                    type="text"
+                    value={newResult.normalRange}
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, normalRange: e.target.value })
+                    }
+                    placeholder="e.g., 12.0 - 16.0 g/dL"
+                  />
+                </FormGroup>
+
+                <ActionButton
+                  className="secondary"
+                  onClick={handleAddResult}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Plus size={16} />
+                  Add Result
+                </ActionButton>
+
+                {/* Results list */}
+                <ResultsList>
+                  {results.map((result, index) => (
+                    <ResultItem key={index}>
+                      <ResultInfo>
+                        <ResultName>{result.parameter}</ResultName>
+                        <ResultDetails>
+                          {result.value} {result.unit} | Normal Range:{" "}
+                          {result.normalRange || "N/A"} | Status: {result.status}
+                        </ResultDetails>
+                      </ResultInfo>
+                      <SmallButton
+                        className="danger"
+                        onClick={() => handleRemoveResult(index)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Trash2 size={12} />
+                        Remove
+                      </SmallButton>
+                    </ResultItem>
+                  ))}
+                </ResultsList>
+              </>
+            )}
+
+            {/* Imaging test form */}
+            {labTest?.testType?.toLowerCase().includes("imaging") && (
+              <>
+                <FormGroup>
+                  <FormLabel>Upload Image</FormLabel>
+                  <FormInput
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, image: e.target.files[0] })
+                    }
+                  />
+                </FormGroup>
+              </>
+            )}
+
+            {/* Common form fields */}
+            <FormGroup>
+              <FormLabel>Interpretation</FormLabel>
+              <FormTextarea
+                value={interpretation}
+                onChange={(e) => setInterpretation(e.target.value)}
+                placeholder="Enter your interpretation"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>Conclusion</FormLabel>
+              <FormTextarea
+                value={conclusion}
+                onChange={(e) => setConclusion(e.target.value)}
+                placeholder="Enter your conclusion"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>Recommendations</FormLabel>
+              <FormTextarea
+                value={recommendations}
+                onChange={(e) => setRecommendations(e.target.value)}
+                placeholder="Enter any recommendations"
+              />
+            </FormGroup>
+
+            <ActionButton
+              className="success"
+              onClick={
+                labTest?.testType?.toLowerCase().includes("imaging")
+                  ? handleImageUpload
+                  : handleSubmitResults
+              }
+              disabled={updating}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Save size={16} />
+              {updating ? "Submitting..." : "Submit Results"}
+            </ActionButton>
+          </ResultsSection>
+        )}
+
+        {/* Completed test display */}
+        {labTest?.status === "completed" && labTest?.results && (
+          <ResultsSection>
+            <SectionTitle>
+              <CheckCircle size={20} />
+              Test Results
+            </SectionTitle>
+
+            {labTest.results.imageUrl && (
+              <FormGroup>
+                <FormLabel>Test Image</FormLabel>
+                <div style={{ margin: "10px 0" }}>
+                  <img
+                    src={labTest.results.imageUrl}
+                    alt="Test Result"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "300px",
+                      borderRadius: "8px",
+                      border: "1px solid #e2e8f0"
+                    }}
+                  />
+                </div>
+              </FormGroup>
+            )}
+
+            {labTest.results.parameters && (
+              <ResultsList>
+                {labTest.results.parameters.map((result, index) => (
+                  <ResultItem key={index}>
+                    <ResultInfo>
+                      <ResultName>{result.parameter}</ResultName>
+                      <ResultDetails>
+                        {result.value} {result.unit} | Normal Range:{" "}
+                        {result.normalRange || "N/A"} | Status: {result.status}
+                      </ResultDetails>
+                    </ResultInfo>
+                  </ResultItem>
+                ))}
+              </ResultsList>
+            )}
+
+            {labTest.results.interpretation && (
+              <FormGroup>
+                <FormLabel>Interpretation</FormLabel>
+                <div style={{
+                  padding: "12px",
+                  background: "white",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px"
+                }}>
+                  {labTest.results.interpretation}
+                </div>
+              </FormGroup>
+            )}
+
+            {labTest.results.conclusion && (
+              <FormGroup>
+                <FormLabel>Conclusion</FormLabel>
+                <div style={{
+                  padding: "12px",
+                  background: "white",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px"
+                }}>
+                  {labTest.results.conclusion}
+                </div>
+              </FormGroup>
+            )}
+
+            {labTest.results.recommendations && (
+              <FormGroup>
+                <FormLabel>Recommendations</FormLabel>
+                <div style={{
+                  padding: "12px",
+                  background: "white",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px"
+                }}>
+                  {labTest.results.recommendations}
+                </div>
+              </FormGroup>
+            )}
+          </ResultsSection>
+        )}
+
+        {/* Doctor review section */}
+        {hasAnyRole(["doctor"]) && labTest?.status === "completed" && (
+          <ResultsSection>
+            <SectionTitle>
+              <CheckCircle size={20} />
+              Doctor Review
+            </SectionTitle>
+
+            {labTest.doctorReview?.reviewed ? (
+              <div>
+                <div
+                  style={{
+                    background: "#f0fff4",
+                    border: "2px solid #68d391",
+                    padding: "15px",
+                    borderRadius: "10px",
+                    marginBottom: "15px"
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "10px",
+                      color: "#2f855a",
+                      fontWeight: "600"
+                    }}
+                  >
+                    <CheckCircle size={16} />
+                    Test Reviewed
+                  </div>
+                  <div style={{ color: "#2d3748", fontSize: "14px" }}>
+                    Reviewed on{" "}
+                    {format(
+                      parseISO(labTest.doctorReview.reviewedAt),
+                      "MMM dd, yyyy hh:mm a"
+                    )}
+                  </div>
+                </div>
+
+                <FormGroup>
+                  <FormLabel>Review Comments</FormLabel>
+                  <div style={{
+                    padding: "12px",
+                    background: "white",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px"
+                  }}>
+                    {labTest.doctorReview.comments}
+                  </div>
+                </FormGroup>
+
+                {labTest.doctorReview.actionTaken && (
+                  <FormGroup>
+                    <FormLabel>Action Taken</FormLabel>
+                    <div style={{
+                      padding: "12px",
+                      background: "white",
+                      border: "2px solid #e2e8f0",
+                      borderRadius: "8px"
+                    }}>
+                      {labTest.doctorReview.actionTaken}
+                    </div>
+                  </FormGroup>
+                )}
+              </div>
+            ) : showReviewForm ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <FormGroup>
+                  <FormLabel>Review Comments *</FormLabel>
+                  <FormTextarea
+                    value={reviewComments}
+                    onChange={(e) => setReviewComments(e.target.value)}
+                    placeholder="Enter your review comments..."
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>Action Taken (Optional)</FormLabel>
+                  <FormTextarea
+                    value={reviewAction}
+                    onChange={(e) => setReviewAction(e.target.value)}
+                    placeholder="Describe any actions taken based on these results..."
+                  />
+                </FormGroup>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <ActionButton
+                    className="success"
+                    onClick={handleReviewTest}
+                    disabled={updating}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Save size={16} />
+                    {updating ? "Submitting..." : "Submit Review"}
+                  </ActionButton>
+
+                  <ActionButton
+                    className="secondary"
+                    onClick={() => {
+                      setShowReviewForm(false);
+                      setReviewComments("");
+                      setReviewAction("");
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Cancel
+                  </ActionButton>
+                </div>
+              </motion.div>
+            ) : (
+              <div style={{
+                textAlign: "center",
+                padding: "40px",
+                color: "#718096",
+                background: "white",
+                borderRadius: "12px",
+                border: "2px dashed #e2e8f0"
+              }}>
+                <AlertTriangle
+                  size={32}
+                  color="#ed8936"
+                  style={{ marginBottom: "10px" }}
+                />
+                <div style={{ marginBottom: "15px" }}>
+                  This test is ready for review
+                </div>
+                <ActionButton
+                  className="primary"
+                  onClick={() => setShowReviewForm(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <CheckCircle size={16} />
+                  Start Review
+                </ActionButton>
+              </div>
+            )}
+          </ResultsSection>
+        )}
+      </DetailCard>
+    </PageContainer>
+  );
+}
+
+export default LabTestDetail;
