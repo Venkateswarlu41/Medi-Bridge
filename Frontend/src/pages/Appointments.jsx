@@ -16,7 +16,8 @@ import {
   CheckCircle,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import appointmentService from '../services/appointment.service';
@@ -24,54 +25,73 @@ import { useAuth } from '../context/AuthContext';
 import { format, parseISO } from 'date-fns';
 
 const PageContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 40px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+  }
 `;
 
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
 `;
 
 const PageTitle = styled.h1`
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
-  color: #2d3748;
+  color: #1a1a1a;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  font-family: var(--font-family-heading);
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
 `;
 
 const AddButton = styled(motion.button)`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: var(--font-family-button);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(84, 169, 234, 0.4);
   }
 `;
 
 const FiltersContainer = styled.div`
   background: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
+  margin-bottom: 32px;
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
   flex-wrap: wrap;
 `;
@@ -84,73 +104,105 @@ const SearchContainer = styled.div`
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 12px 15px 12px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
   transition: all 0.3s ease;
+  background: #f9fafb;
+  font-family: var(--font-family-body);
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
   }
 `;
 
 const SearchIcon = styled.div`
   position: absolute;
-  left: 15px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a0aec0;
+  color: #9ca3af;
 `;
 
 const FilterSelect = styled.select`
-  padding: 12px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #f9fafb;
   cursor: pointer;
+  font-family: var(--font-family-body);
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 `;
 
 const DateInput = styled.input`
-  padding: 12px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #f9fafb;
   cursor: pointer;
+  font-family: var(--font-family-body);
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 `;
 
 const AppointmentsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const AppointmentCard = styled(motion.div)`
   background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid ${props => getStatusColor(props.$status)};
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${props => getStatusColor(props.$status)};
+  }
+
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(84, 169, 234, 0.12);
+    border-color: rgba(84, 169, 234, 0.2);
   }
 `;
 
@@ -158,7 +210,7 @@ const AppointmentHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 `;
 
 const AppointmentInfo = styled.div`
@@ -166,127 +218,167 @@ const AppointmentInfo = styled.div`
 `;
 
 const AppointmentId = styled.div`
-  font-size: 14px;
-  color: #718096;
-  margin-bottom: 5px;
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  font-weight: 500;
 `;
 
 const AppointmentTime = styled.div`
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-family: var(--font-family-heading);
 `;
 
 const AppointmentDate = styled.div`
   font-size: 14px;
-  color: #4a5568;
+  color: #6b7280;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 500;
 `;
 
 const StatusBadge = styled.div`
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  background: ${props => getStatusColor(props.$status)}20;
-  color: ${props => getStatusColor(props.$status)};
+  background: ${props => getStatusColor(props.$status)};
+  color: white;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
+  letter-spacing: 0.5px;
 `;
 
 const AppointmentDetails = styled.div`
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 `;
 
 const DetailRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
   font-size: 14px;
-  color: #4a5568;
+  color: #4b5563;
+  font-weight: 500;
+
+  svg {
+    color: #54a9ea;
+  }
 `;
 
 const AppointmentType = styled.div`
   display: inline-block;
-  padding: 4px 8px;
-  background: #f7fafc;
-  border-radius: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.1) 0%, rgba(132, 88, 253, 0.1) 100%);
+  border: 2px solid rgba(84, 169, 234, 0.2);
+  border-radius: 10px;
   font-size: 12px;
-  color: #4a5568;
+  color: #54a9ea;
   text-transform: capitalize;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  font-weight: 600;
 `;
 
 const ChiefComplaint = styled.div`
   font-size: 14px;
-  color: #2d3748;
-  background: #f7fafc;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.05) 0%, rgba(132, 88, 253, 0.05) 100%);
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 2px solid rgba(84, 169, 234, 0.1);
+  line-height: 1.6;
+
+  strong {
+    color: #54a9ea;
+    font-weight: 600;
+  }
 `;
 
 const AppointmentActions = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 `;
 
 const ActionButton = styled(motion.button)`
-  padding: 8px 12px;
-  border: 2px solid #e2e8f0;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
-  color: #4a5568;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
   transition: all 0.3s ease;
+  font-weight: 600;
+  font-family: var(--font-family-button);
 
   &:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #54a9ea;
+    color: #54a9ea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.15);
   }
 
   &.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 6px 20px rgba(84, 169, 234, 0.4);
     }
   }
 
   &.success {
-    background: #48bb78;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 
     &:hover {
-      background: #38a169;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     }
   }
 
   &.danger {
-    background: #e53e3e;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 
     &:hover {
-      background: #c53030;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+  }
+
+  &.secondary {
+    background: linear-gradient(135deg, rgba(84, 169, 234, 0.1) 0%, rgba(132, 88, 253, 0.1) 100%);
+    color: #54a9ea;
+    border-color: rgba(84, 169, 234, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(84, 169, 234, 0.2) 0%, rgba(132, 88, 253, 0.2) 100%);
+      border-color: #54a9ea;
     }
   }
 `;
@@ -295,36 +387,41 @@ const Pagination = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-top: 30px;
+  gap: 12px;
+  margin-top: 40px;
 `;
 
 const PaginationButton = styled.button`
-  padding: 10px 15px;
-  border: 2px solid #e2e8f0;
+  padding: 12px 18px;
+  border: 2px solid #e5e7eb;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: #4a5568;
+  gap: 6px;
+  color: #6b7280;
   transition: all 0.3s ease;
+  font-weight: 600;
+  font-family: var(--font-family-button);
 
   &:hover:not(:disabled) {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #54a9ea;
+    color: #54a9ea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.15);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   &.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
   }
 `;
 
@@ -332,39 +429,47 @@ const LoadingContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  color: #718096;
+  height: 400px;
+  color: #6b7280;
+  font-size: 16px;
+  font-weight: 500;
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 60px 20px;
-  color: #718096;
+  padding: 80px 24px;
+  color: #6b7280;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.03) 0%, rgba(132, 88, 253, 0.03) 100%);
+  border-radius: 20px;
+  border: 2px dashed #e5e7eb;
 
   h3 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #4a5568;
+    font-size: 28px;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-family: var(--font-family-heading);
   }
 
   p {
     font-size: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    color: #6b7280;
   }
 `;
 
 // Helper function to get status color
 const getStatusColor = (status) => {
   const colors = {
-    scheduled: '#667eea',
-    confirmed: '#48bb78',
-    'in-progress': '#ed8936',
-    completed: '#38b2ac',
-    cancelled: '#e53e3e',
-    'no-show': '#a0aec0',
-    rescheduled: '#9f7aea'
+    scheduled: 'linear-gradient(135deg, #54a9ea 0%, #8458fd 100%)',
+    confirmed: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    'in-progress': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    completed: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+    cancelled: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    'no-show': 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+    rescheduled: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
   };
-  return colors[status] || '#718096';
+  return colors[status] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
 };
 
 // Helper function to get status icon
@@ -476,6 +581,20 @@ const Appointments = () => {
       } catch (error) {
         toast.error('Failed to cancel appointment');
       }
+    }
+  };
+
+  const handleDownloadRecord = async (appointmentId) => {
+    try {
+      const result = await appointmentService.downloadAppointmentRecord(appointmentId);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download appointment record');
     }
   };
 
@@ -632,6 +751,18 @@ const Appointments = () => {
                     <Eye size={16} />
                     View
                   </ActionButton>
+
+                  {appointment.status === 'completed' && (
+                    <ActionButton
+                      className="secondary"
+                      onClick={() => handleDownloadRecord(appointment._id)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Download size={16} />
+                      Download
+                    </ActionButton>
+                  )}
                   
                   {hasAnyRole(['admin', 'doctor']) && appointment.status === 'scheduled' && (
                     <ActionButton

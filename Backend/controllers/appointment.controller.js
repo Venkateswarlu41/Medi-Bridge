@@ -29,7 +29,14 @@ const getAllAppointments = async (req, res) => {
     }
     
     // Apply filters
-    if (status) query.status = status;
+    if (status) {
+      // Handle multiple status values separated by comma
+      if (status.includes(',')) {
+        query.status = { $in: status.split(',') };
+      } else {
+        query.status = status;
+      }
+    }
     if (doctorId && req.user.role !== 'doctor') query.doctor = doctorId;
     if (patientId && req.user.role !== 'patient') query.patient = patientId;
     if (departmentId) query.department = departmentId;
@@ -532,6 +539,225 @@ const getDoctorAvailability = async (req, res) => {
   }
 };
 
+// Download appointment medical record as PDF
+const downloadAppointmentRecord = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const appointment = await Appointment.findById(id)
+      .populate('patient', 'firstName lastName email phone dateOfBirth gender bloodGroup address')
+      .populate('doctor', 'firstName lastName specialization licenseNumber')
+      .populate('department', 'name code location')
+      .populate('scheduledBy', 'firstName lastName');
+    
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+    
+    // Check access permissions
+    if (req.user.role === 'patient' && appointment.patient._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+    
+    if (req.user.role === 'doctor' && appointment.doctor._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    // Get related medical record if appointment is completed
+    let medicalRecord = null;
+    if (appointment.status === 'completed') {
+      const MedicalRecord = require('../models/medicalRecord.model');
+      medicalRecord = await MedicalRecord.findOne({ appointment: appointment._id })
+        .populate('doctor', 'firstName lastName specialization')
+        .populate('patient', 'firstName lastName dateOfBirth gender');
+    }
+    
+    // Generate PDF content
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument();
+    
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="medical-record-${appointment._id}.pdf"`);
+    
+    // Pipe the PDF to the response
+    doc.pipe(res);
+    
+    // Add content to PDF
+    doc.fontSize(20).text('Medical Record', 50, 50);
+    doc.fontSize(12);
+    
+    // Patient Information
+    doc.text('PATIENT INFORMATION', 50, 100);
+    doc.text(`Name: ${appointment.patient.firstName} ${appointment.patient.lastName}`, 50, 120);
+    doc.text(`Date of Birth: ${appointment.patient.dateOfBirth ? new Date(appointment.patient.dateOfBirth).toLocaleDateString() : 'N/A'}`, 50, 140);
+    doc.text(`Gender: ${appointment.patient.gender || 'N/A'}`, 50, 160);
+    doc.text(`Blood Group: ${appointment.patient.bloodGroup || 'N/A'}`, 50, 180);
+    doc.text(`Phone: ${appointment.patient.phone || 'N/A'}`, 50, 200);
+    doc.text(`Email: ${appointment.patient.email || 'N/A'}`, 50, 220);
+    
+    // Appointment Information
+    doc.text('APPOINTMENT INFORMATION', 50, 260);
+    doc.text(`Appointment ID: ${appointment._id}`, 50, 280);
+    doc.text(`Date: ${new Date(appointment.appointmentDate).toLocaleDateString()}`, 50, 300);
+    doc.text(`Time: ${appointment.appointmentTime}`, 50, 320);
+    doc.text(`Type: ${appointment.type}`, 50, 340);
+    doc.text(`Status: ${appointment.status}`, 50, 360);
+    doc.text(`Duration: ${appointment.duration} minutes`, 50, 380);
+    
+    // Doctor Information
+    doc.text('DOCTOR INFORMATION', 50, 420);
+    doc.text(`Doctor: Dr. ${appointment.doctor.firstName} ${appointment.doctor.lastName}`, 50, 440);
+    doc.text(`Specialization: ${appointment.doctor.specialization || 'N/A'}`, 50, 460);
+    doc.text(`Department: ${appointment.department.name}`, 50, 480);
+    
+    // Chief Complaint
+    if (appointment.chiefComplaint) {
+      doc.text('CHIEF COMPLAINT', 50, 520);
+      doc.text(appointment.chiefComplaint, 50, 540, { width: 500 });
+    }
+    
+    // Medical Record Details (if appointment is completed)
+    if (medicalRecord) {
+      let yPosition = 600;
+      
+      doc.text('MEDICAL RECORD DETAILS', 50, yPosition);
+      yPosition += 20;
+      
+      if (medicalRecord.diagnosis && medicalRecord.diagnosis.length > 0) {
+        doc.text('Diagnosis:', 50, yPosition);
+        yPosition += 20;
+        medicalRecord.diagnosis.forEach((diag, index) => {
+          doc.text(`${index + 1}. ${diag.description}`, 70, yPosition);
+          yPosition += 15;
+        });
+        yPosition += 10;
+      }
+      
+      if (medicalRecord.prescriptions && medicalRecord.prescriptions.length > 0) {
+        doc.text('Prescriptions:', 50, yPosition);
+        yPosition += 20;
+        medicalRecord.prescriptions.forEach((med, index) => {
+          doc.text(`${index + 1}. ${med.medication} - ${med.dosage} (${med.frequency})`, 70, yPosition);
+          if (med.instructions) {
+            yPosition += 15;
+            doc.text(`   Instructions: ${med.instructions}`, 70, yPosition);
+          }
+          yPosition += 15;
+        });
+        yPosition += 10;
+      }
+      
+      if (medicalRecord.labTests && medicalRecord.labTests.length > 0) {
+        doc.text('Lab Tests:', 50, yPosition);
+        yPosition += 20;
+        medicalRecord.labTests.forEach((test, index) => {
+          doc.text(`${index + 1}. ${test.testName} - ${test.result} (${test.status})`, 70, yPosition);
+          yPosition += 15;
+        });
+        yPosition += 10;
+      }
+      
+      if (medicalRecord.notes) {
+        doc.text('Additional Notes:', 50, yPosition);
+        yPosition += 20;
+        doc.text(medicalRecord.notes, 50, yPosition, { width: 500 });
+      }
+    }
+    
+    // Footer
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 50, doc.page.height - 50);
+    
+    // Finalize the PDF
+    doc.end();
+    
+  } catch (error) {
+    console.error('Download appointment record error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to download appointment record',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// Get dashboard statistics for patient
+const getPatientDashboardStats = async (req, res) => {
+  try {
+    const patientId = req.user._id;
+    
+    // Get upcoming appointments count
+    const upcomingAppointments = await Appointment.countDocuments({
+      patient: patientId,
+      status: { $in: ['scheduled', 'confirmed'] }
+    });
+    
+    // Get total appointments count
+    const totalAppointments = await Appointment.countDocuments({
+      patient: patientId
+    });
+    
+    // Get completed appointments count
+    const completedAppointments = await Appointment.countDocuments({
+      patient: patientId,
+      status: 'completed'
+    });
+    
+    // Get medical records count
+    const MedicalRecord = require('../models/medicalRecord.model');
+    const totalMedicalRecords = await MedicalRecord.countDocuments({
+      patient: patientId
+    });
+    
+    // Get lab tests count (if lab test model exists)
+    let pendingLabResults = 0;
+    let totalLabTests = 0;
+    try {
+      const LabTest = require('../models/labTest.model');
+      pendingLabResults = await LabTest.countDocuments({
+        patient: patientId,
+        status: 'completed',
+        patientViewed: { $ne: true }
+      });
+      totalLabTests = await LabTest.countDocuments({
+        patient: patientId
+      });
+    } catch (error) {
+      console.log('Lab test model not found, skipping lab test stats');
+    }
+    
+    const stats = {
+      upcomingAppointments,
+      totalAppointments,
+      completedAppointments,
+      totalMedicalRecords,
+      pendingLabResults,
+      totalLabTests
+    };
+    
+    res.json({
+      success: true,
+      data: { stats }
+    });
+  } catch (error) {
+    console.error('Get patient dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard statistics',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   getAllAppointments,
   getAppointmentById,
@@ -539,5 +765,7 @@ module.exports = {
   updateAppointment,
   cancelAppointment,
   updateAppointmentStatus,
-  getDoctorAvailability
+  getDoctorAvailability,
+  downloadAppointmentRecord,
+  getPatientDashboardStats
 };

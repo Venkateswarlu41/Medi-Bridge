@@ -11,45 +11,79 @@ const LoginContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(84, 169, 234, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(132, 88, 253, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 `;
 
 const LoginCard = styled(motion.div)`
   background: white;
-  border-radius: 20px;
-  padding: 40px;
+  border-radius: 24px;
+  padding: 48px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f3f4f6;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 480px) {
+    padding: 32px 24px;
+  }
 `;
 
 const Logo = styled.div`
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 `;
 
 const LogoIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 15px;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 `;
 
 const Title = styled.h1`
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #2d3748;
-  margin: 0 0 5px;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  font-family: var(--font-family-heading);
 `;
 
 const Subtitle = styled.p`
-  color: #718096;
-  margin: 0 0 30px;
+  color: #6b7280;
+  margin: 0 0 32px;
+  font-size: 15px;
 `;
 
 const Form = styled.form`
@@ -73,63 +107,68 @@ const InputIcon = styled.div`
 
 const Input = styled.input`
   width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 16px 16px 16px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
   transition: all 0.3s ease;
-  background: #f7fafc;
+  background: #f9fafb;
+  font-family: var(--font-family-body);
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
     background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 
   &::placeholder {
-    color: #a0aec0;
+    color: #9ca3af;
   }
 `;
 
 const PasswordToggle = styled.button`
   position: absolute;
-  right: 15px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #a0aec0;
+  color: #9ca3af;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px;
+  transition: all 0.2s ease;
   
   &:hover {
-    color: #667eea;
+    color: #54a9ea;
   }
 `;
 
 const LoginButton = styled(motion.button)`
   width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: var(--font-family-button);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(84, 169, 234, 0.4);
   }
 
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 `;
 
@@ -142,41 +181,67 @@ const ErrorMessage = styled.div`
 
 const RegisterLink = styled.div`
   text-align: center;
-  margin-top: 20px;
-  color: #718096;
+  margin-top: 24px;
+  color: #6b7280;
+  font-size: 14px;
   
   a {
-    color: #667eea;
+    color: #54a9ea;
     text-decoration: none;
     font-weight: 600;
     
     &:hover {
+      color: #8458fd;
       text-decoration: underline;
     }
   }
 `;
 
 const DemoCredentials = styled.div`
-  margin-top: 20px;
-  padding: 15px;
-  background: #f7fafc;
-  border-radius: 10px;
-  border-left: 4px solid #667eea;
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.05) 0%, rgba(132, 88, 253, 0.05) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(84, 169, 234, 0.1);
 `;
 
 const DemoTitle = styled.h4`
-  margin: 0 0 10px;
-  color: #2d3748;
-  font-size: 14px;
+  margin: 0 0 12px;
+  color: #1a1a1a;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-family-heading);
 `;
 
 const DemoRole = styled.div`
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: #4a5568;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   
   strong {
-    color: #2d3748;
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+
+  button {
+    margin-left: 10px;
+    font-size: 11px;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
+    }
   }
 `;
 
@@ -287,29 +352,20 @@ const Login = () => {
         <DemoCredentials>
           <DemoTitle>Demo Credentials:</DemoTitle>
           <DemoRole>
-            <strong>Admin:</strong> admin@example.com / password123
-            <button 
-              onClick={() => fillDemoCredentials('admin@example.com', 'password123')}
-              style={{ marginLeft: '10px', fontSize: '10px', padding: '2px 6px', background: '#667eea', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
+            <span><strong>Admin:</strong> admin@example.com / password123</span>
+            <button onClick={() => fillDemoCredentials('admin@example.com', 'password123')}>
               Use
             </button>
           </DemoRole>
           <DemoRole>
-            <strong>Doctor:</strong> doctor@example.com / password123
-            <button 
-              onClick={() => fillDemoCredentials('doctor@example.com', 'password123')}
-              style={{ marginLeft: '10px', fontSize: '10px', padding: '2px 6px', background: '#667eea', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
+            <span><strong>Doctor:</strong> doctor@example.com / password123</span>
+            <button onClick={() => fillDemoCredentials('doctor@example.com', 'password123')}>
               Use
             </button>
           </DemoRole>
           <DemoRole>
-            <strong>Patient:</strong> patient@example.com / password123
-            <button 
-              onClick={() => fillDemoCredentials('patient@example.com', 'password123')}
-              style={{ marginLeft: '10px', fontSize: '10px', padding: '2px 6px', background: '#667eea', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
+            <span><strong>Patient:</strong> patient@example.com / password123</span>
+            <button onClick={() => fillDemoCredentials('patient@example.com', 'password123')}>
               Use
             </button>
           </DemoRole>

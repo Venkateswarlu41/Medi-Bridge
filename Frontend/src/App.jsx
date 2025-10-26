@@ -338,19 +338,48 @@ function App() {
             toastOptions={{
               duration: 4000,
               style: {
-                background: "#363636",
-                color: "#fff",
+                background: "var(--surface-color)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-light)",
+                borderRadius: "var(--radius-xl)",
+                boxShadow: "var(--shadow-lg)",
+                fontSize: "var(--font-size-sm)",
+                fontWeight: "var(--font-weight-medium)",
+                padding: "var(--spacing-4) var(--spacing-5)",
               },
               success: {
                 duration: 3000,
-                theme: {
-                  primary: "#4aed88",
+                style: {
+                  background: "var(--success-50)",
+                  color: "var(--success-800)",
+                  border: "1px solid var(--success-200)",
+                },
+                iconTheme: {
+                  primary: "var(--success-600)",
+                  secondary: "var(--success-50)",
                 },
               },
               error: {
-                duration: 4000,
-                theme: {
-                  primary: "#f56565",
+                duration: 5000,
+                style: {
+                  background: "var(--danger-50)",
+                  color: "var(--danger-800)",
+                  border: "1px solid var(--danger-200)",
+                },
+                iconTheme: {
+                  primary: "var(--danger-600)",
+                  secondary: "var(--danger-50)",
+                },
+              },
+              loading: {
+                style: {
+                  background: "var(--primary-50)",
+                  color: "var(--primary-800)",
+                  border: "1px solid var(--primary-200)",
+                },
+                iconTheme: {
+                  primary: "var(--primary-600)",
+                  secondary: "var(--primary-50)",
                 },
               },
             }}

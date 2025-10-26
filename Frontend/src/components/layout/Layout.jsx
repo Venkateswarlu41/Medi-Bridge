@@ -34,15 +34,15 @@ const LayoutContainer = styled.div`
 `;
 
 const Sidebar = styled(motion.aside)`
-  width: 280px;
-  background: white;
-  box-shadow: var(--shadow-md);
+  width: 300px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   position: fixed;
   height: 100vh;
-  z-index: 1000;
-  border-right: 1px solid var(--gray-200);
+  z-index: var(--z-fixed);
+  border-right: 1px solid var(--border-light);
 
   @media (max-width: 768px) {
     width: 100%;
@@ -55,36 +55,44 @@ const Sidebar = styled(motion.aside)`
 `;
 
 const SidebarHeader = styled.div`
-  padding: 20px;
-  border-bottom: 1px solid var(--gray-200);
+  padding: var(--spacing-8) var(--spacing-6);
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-4);
+  background: linear-gradient(135deg, var(--primary-50) 0%, transparent 100%);
 `;
 
 const Logo = styled.div`
-  width: 42px;
-  height: 42px;
-  background: var(--primary-color);
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 120, 212, 0.2);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    pointer-events: none;
+  }
 `;
 
 const LogoText = styled.h1`
-  font-size: 22px;
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 `;
 
 const SidebarNav = styled.nav`
@@ -186,9 +194,10 @@ const UserRole = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  margin-left: 280px;
+  margin-left: 300px;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 
   @media (max-width: 768px) {
     margin-left: 0;
@@ -196,16 +205,23 @@ const MainContent = styled.main`
 `;
 
 const TopBar = styled.header`
-  background: white;
-  padding: 18px 30px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: var(--spacing-5) var(--spacing-8);
   box-shadow: var(--shadow-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 100;
-  border-bottom: 1px solid var(--gray-200);
+  z-index: var(--z-sticky);
+  border-bottom: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+  min-height: 80px;
+  
+  @media (max-width: 768px) {
+    padding: var(--spacing-4) var(--spacing-4);
+    min-height: 70px;
+  }
 `;
 
 const TopBarLeft = styled.div`
@@ -234,23 +250,28 @@ const SearchBar = styled.div`
 `;
 
 const SearchInput = styled.input`
-  width: 320px;
-  padding: 12px 16px 12px 42px;
-  border: 1px solid var(--gray-200);
-  border-radius: 12px;
-  font-size: 14px;
-  background: var(--gray-50);
-  transition: all 0.3s ease;
+  width: 400px;
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-3) var(--spacing-12);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-sm);
+  background: var(--surface-color);
+  transition: all var(--transition-fast);
+  font-family: var(--font-family-primary);
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+    border-color: var(--primary-500);
+    background: var(--surface-color);
+    box-shadow: 0 0 0 3px var(--primary-100);
   }
 
   &::placeholder {
-    color: var(--gray-400);
+    color: var(--text-muted);
+  }
+  
+  @media (max-width: 768px) {
+    width: 250px;
   }
 
   @media (max-width: 768px) {
@@ -260,8 +281,9 @@ const SearchInput = styled.input`
 
 const SearchIcon = styled.div`
   position: absolute;
-  left: 12px;
-  color: var(--gray-400);
+  left: var(--spacing-4);
+  color: var(--text-muted);
+  z-index: 1;
 `;
 
 const TopBarRight = styled.div`

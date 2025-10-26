@@ -333,8 +333,14 @@ const MedicalRecordDetail = () => {
 
   const handleDownload = async () => {
     try {
-      toast.success('Download feature coming soon');
+      const result = await medicalRecordService.downloadMedicalRecord(id);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
+      console.error('Download error:', error);
       toast.error('Failed to download record');
     }
   };

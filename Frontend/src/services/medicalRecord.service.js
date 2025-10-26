@@ -223,6 +223,46 @@ class MedicalRecordService {
       };
     }
   }
+
+  // Download medical record as PDF
+  async downloadMedicalRecord(recordId) {
+    try {
+      const response = await api.get(`/medical-records/${recordId}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `medical-record-${recordId}.pdf`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      return {
+        success: true,
+        message: 'Medical record downloaded successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to download medical record'
+      };
+    }
+  }
 }
 
 export default new MedicalRecordService();

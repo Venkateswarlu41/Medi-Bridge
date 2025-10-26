@@ -22,7 +22,8 @@ import {
   Plus,
   Trash2,
   Eye,
-  Send
+  Send,
+  Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import appointmentService from '../services/appointment.service';
@@ -521,6 +522,20 @@ const AppointmentDetail = () => {
     }
   };
 
+  const handleDownloadRecord = async () => {
+    try {
+      const result = await appointmentService.downloadAppointmentRecord(id);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download appointment record');
+    }
+  };
+
   const handleSaveNotes = async () => {
     try {
       // Save notes using the update appointment endpoint
@@ -713,56 +728,82 @@ const AppointmentDetail = () => {
             </StatusBadge>
           </HeaderLeft>
 
-          {hasAnyRole(['admin', 'doctor']) && (
-            <ActionsContainer>
-              {appointment.status === 'scheduled' && (
-                <ActionButton
-                  className="success"
-                  onClick={() => handleStatusUpdate('confirmed')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <CheckCircle size={16} />
-                  Confirm
-                </ActionButton>
-              )}
+          <ActionsContainer>
+            {/* Download button for all users */}
+            <ActionButton
+              className="secondary"
+              onClick={handleDownloadRecord}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download size={16} />
+              Download Record
+            </ActionButton>
 
-              {appointment.status === 'confirmed' && (
-                <ActionButton
-                  className="primary"
-                  onClick={() => handleStatusUpdate('in-progress')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <AlertCircle size={16} />
-                  Start
-                </ActionButton>
-              )}
-
-              {appointment.status === 'in-progress' && (
-                <>
+            {/* Admin/Doctor specific actions */}
+            {hasAnyRole(['admin', 'doctor']) && (
+              <>
+                {appointment.status === 'scheduled' && (
                   <ActionButton
                     className="success"
-                    onClick={() => {
-                      // Check if all lab tests are reviewed before allowing completion
-                      const pendingTests = labTests.filter(test => 
-                        test.status === 'completed' && !test.doctorReview?.reviewed
-                      );
-                      
-                      if (pendingTests.length > 0) {
-                        toast.error(`Please review ${pendingTests.length} pending lab test(s) before completing the appointment`);
-                        return;
-                      }
-                      
-                      handleStatusUpdate('completed');
-                    }}
+                    onClick={() => handleStatusUpdate('confirmed')}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    style={{ fontSize: '16px', padding: '16px 24px' }}
                   >
-                    <CheckCircle size={18} />
-                    Complete Appointment
+                    <CheckCircle size={16} />
+                    Confirm
                   </ActionButton>
+                )}
+
+                {appointment.status === 'confirmed' && (
+                  <ActionButton
+                    className="primary"
+                    onClick={() => handleStatusUpdate('in-progress')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <AlertCircle size={16} />
+                    Start
+                  </ActionButton>
+                )}
+
+                {appointment.status === 'in-progress' && (
+                  <>
+                    <ActionButton
+                      className="success"
+                      onClick={() => {
+                        // Check if all lab tests are reviewed before allowing completion
+                        const pendingTests = labTests.filter(test => 
+                          test.status === 'completed' && !test.doctorReview?.reviewed
+                        );
+                        
+                        if (pendingTests.length > 0) {
+                          toast.error(`Please review ${pendingTests.length} pending lab test(s) before completing the appointment`);
+                          return;
+                        }
+                        
+                        handleStatusUpdate('completed');
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      style={{ fontSize: '16px', padding: '16px 24px' }}
+                    >
+                      <CheckCircle size={18} />
+                      Complete Appointment
+                    </ActionButton>
+                    <ActionButton
+                      className="danger"
+                      onClick={() => handleStatusUpdate('cancelled')}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <X size={16} />
+                      Cancel
+                    </ActionButton>
+                  </>
+                )}
+
+                {['scheduled', 'confirmed'].includes(appointment.status) && (
                   <ActionButton
                     className="danger"
                     onClick={() => handleStatusUpdate('cancelled')}
@@ -772,22 +813,10 @@ const AppointmentDetail = () => {
                     <X size={16} />
                     Cancel
                   </ActionButton>
-                </>
-              )}
-
-              {['scheduled', 'confirmed'].includes(appointment.status) && (
-                <ActionButton
-                  className="danger"
-                  onClick={() => handleStatusUpdate('cancelled')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <X size={16} />
-                  Cancel
-                </ActionButton>
-              )}
-            </ActionsContainer>
-          )}
+                )}
+              </>
+            )}
+          </ActionsContainer>
         </Header>
 
         <InfoGrid>

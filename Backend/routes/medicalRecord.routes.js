@@ -128,4 +128,10 @@ router.patch('/:id/review',
   reviewMedicalRecord
 );
 
+// Download medical record as PDF
+router.get('/:id/download', 
+  authorizeRoles('admin', 'doctor', 'patient'), 
+  require('../controllers/medicalRecord.controller').downloadMedicalRecord
+);
+
 module.exports = router;

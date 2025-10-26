@@ -16,7 +16,12 @@ import {
   Settings,
   Bell,
   Eye,
-  TrendingUp
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  BarChart3,
+  Clock,
+  CheckCircle
 } from 'lucide-react';
 import appointmentService from '../../services/appointment.service';
 import doctorService from '../../services/doctor.service';
@@ -24,45 +29,68 @@ import dashboardService from '../../services/dashboard.service';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
-  background: #f7fafc;
+  background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(84, 169, 234, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
 `;
 
 const Header = styled.header`
   background: white;
-  padding: 20px 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 24px 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 `;
 
 const Logo = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 `;
 
 const LogoIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 20px rgba(84, 169, 234, 0.3);
 `;
 
 const LogoText = styled.h1`
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  color: #2d3748;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
+  font-family: var(--font-family-heading);
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 `;
 
 const UserDetails = styled.div`
@@ -71,92 +99,177 @@ const UserDetails = styled.div`
 
 const UserName = styled.div`
   font-weight: 600;
-  color: #2d3748;
+  color: #1a1a1a;
+  font-size: 15px;
+  font-family: var(--font-family-heading);
 `;
 
 const UserRole = styled.div`
-  font-size: 14px;
-  color: #718096;
+  font-size: 13px;
+  color: #6b7280;
   text-transform: capitalize;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 12px;
 `;
 
 const ActionButton = styled.button`
-  padding: 10px;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  padding: 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
   cursor: pointer;
-  color: #4a5568;
+  color: #6b7280;
   transition: all 0.3s ease;
+  position: relative;
 
   &:hover {
-    background: #edf2f7;
-    color: #2d3748;
+    background: white;
+    color: #54a9ea;
+    border-color: #54a9ea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.15);
   }
 `;
 
 const LogoutButton = styled(ActionButton)`
   &:hover {
-    background: #fed7d7;
-    color: #e53e3e;
-    border-color: #feb2b2;
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
   }
 `;
 
 const MainContent = styled.main`
-  padding: 30px;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+  }
 `;
 
 const WelcomeSection = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
   color: white;
-  padding: 40px;
-  border-radius: 20px;
-  margin-bottom: 30px;
+  padding: 48px;
+  border-radius: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 20px 60px rgba(84, 169, 234, 0.25);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 `;
 
 const WelcomeTitle = styled.h2`
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  font-family: var(--font-family-heading);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
 `;
 
 const WelcomeSubtitle = styled.p`
   font-size: 18px;
-  opacity: 0.9;
+  opacity: 0.95;
   margin: 0;
+  position: relative;
+  z-index: 1;
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
 `;
 
 const StatCard = styled(motion.div)`
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${props => props.color || 'linear-gradient(90deg, #54a9ea 0%, #8458fd 100%)'};
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(84, 169, 234, 0.12);
+    border-color: rgba(84, 169, 234, 0.2);
+
+    &::before {
+      transform: scaleX(1);
+    }
+  }
 `;
 
 const StatIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  border-radius: 15px;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${props => props.color || '#667eea'};
+  background: ${props => props.color || 'linear-gradient(135deg, #54a9ea 0%, #8458fd 100%)'};
+  box-shadow: 0 10px 25px ${props => props.color ? `${props.color}40` : 'rgba(84, 169, 234, 0.25)'};
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 18px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
 `;
 
 const StatInfo = styled.div`
@@ -164,129 +277,175 @@ const StatInfo = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 5px;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  font-family: var(--font-family-heading);
 `;
 
 const StatLabel = styled.div`
-  color: #718096;
+  color: #6b7280;
   font-size: 14px;
+  font-weight: 500;
 `;
 
 const QuickActions = styled.div`
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 20px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 24px;
+  font-family: var(--font-family-heading);
 `;
 
 const ActionGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 `;
 
 const QuickActionCard = styled(motion.button)`
-  background: #f7fafc;
-  border: 2px solid #e2e8f0;
-  padding: 20px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.03) 0%, rgba(132, 88, 253, 0.03) 100%);
+  border: 2px solid #e5e7eb;
+  padding: 24px;
+  border-radius: 16px;
   cursor: pointer;
   text-align: left;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #54a9ea 0%, #8458fd 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
 
   &:hover {
-    border-color: #667eea;
+    border-color: #54a9ea;
     background: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 10px 30px rgba(84, 169, 234, 0.15);
+    transform: translateY(-4px);
+
+    &::before {
+      transform: scaleX(1);
+    }
   }
 `;
 
 const ActionIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(84, 169, 234, 0.3);
 `;
 
 const ActionTitle = styled.div`
   font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 5px;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-family: var(--font-family-heading);
 `;
 
 const ActionDescription = styled.div`
-  font-size: 14px;
-  color: #718096;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
 `;
 
 const LoadingSpinner = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  color: #718096;
+  height: 400px;
+  color: #6b7280;
+  font-size: 16px;
+  font-weight: 500;
 `;
 
 const SectionGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 32px;
   
-  @media (max-width: 768px) {
+  @media (max-width: 968px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const Section = styled.div`
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
 `;
 
 const ViewAllButton = styled.button`
-  background: none;
-  border: none;
-  color: #667eea;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.1) 0%, rgba(132, 88, 253, 0.1) 100%);
+  border: 2px solid #e5e7eb;
+  color: #54a9ea;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
   margin-left: auto;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
   
   &:hover {
-    text-decoration: underline;
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
   }
 `;
 
 const RecentList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 `;
 
 const RecentItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background: #f7fafc;
-  border-radius: 10px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.02) 0%, rgba(132, 88, 253, 0.02) 100%);
+  border-radius: 14px;
+  border: 2px solid #f3f4f6;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(84, 169, 234, 0.3);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.08);
+  }
 `;
 
 const RecentInfo = styled.div`
@@ -295,33 +454,46 @@ const RecentInfo = styled.div`
 
 const RecentTitle = styled.div`
   font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 5px;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-family: var(--font-family-heading);
 `;
 
 const RecentSubtitle = styled.div`
-  font-size: 14px;
-  color: #718096;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
 `;
 
 const RecentTime = styled.div`
   font-size: 12px;
-  color: #a0aec0;
+  color: #9ca3af;
+  font-weight: 500;
+  background: #f9fafb;
+  padding: 6px 12px;
+  border-radius: 8px;
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 40px 20px;
-  color: #718096;
+  padding: 48px 24px;
+  color: #6b7280;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.03) 0%, rgba(132, 88, 253, 0.03) 100%);
+  border-radius: 16px;
+  border: 2px dashed #e5e7eb;
   
   h4 {
-    margin: 10px 0 5px;
-    color: #4a5568;
+    margin: 12px 0 6px;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-family: var(--font-family-heading);
   }
   
   p {
     margin: 0;
     font-size: 14px;
+    color: #6b7280;
   }
 `;
 
@@ -344,26 +516,32 @@ const Dashboard = () => {
   const { user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
   
-  // Route to role-specific dashboards
-  if (hasRole(['patient'])) {
-    return <PatientDashboard />;
+  console.log('Dashboard: Rendering, user:', user);
+  console.log('Dashboard: hasRole function:', hasRole);
+  console.log('Dashboard: user.role:', user?.role);
+  
+  // If no user, show loading
+  if (!user) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h2>Loading Dashboard...</h2>
+        <p>Please wait while we load your information.</p>
+      </div>
+    );
   }
   
-  if (hasRole(['doctor'])) {
-    return <DoctorDashboard />;
-  }
-  
-  if (hasRole(['lab_technician'])) {
-    return <LabTechnicianDashboard />;
-  }
-  
-  // Default dashboard for admin and other roles
+  // Default dashboard state for admin and other roles
   const [loading, setLoading] = useState(true);
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [dashboardData, setDashboardData] = useState(null);
   const [adminStats, setAdminStats] = useState({});
 
   useEffect(() => {
+    // Only fetch admin data if user is admin
+    if (!hasRole || !hasRole('admin')) {
+      return;
+    }
+
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
@@ -383,6 +561,26 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [user, hasRole]);
+  
+  // Route to role-specific dashboards
+  console.log('Dashboard: Checking roles...');
+  console.log('Dashboard: hasRole("patient"):', hasRole ? hasRole('patient') : 'hasRole is undefined');
+  console.log('Dashboard: hasRole("doctor"):', hasRole ? hasRole('doctor') : 'hasRole is undefined');
+  
+  // Check user role directly (hasRole expects a string, not an array)
+  if (user?.role === 'patient' || (hasRole && hasRole('patient'))) {
+    console.log('Dashboard: Routing to PatientDashboard');
+    return <PatientDashboard />;
+  }
+  
+  if (user?.role === 'doctor' || (hasRole && hasRole('doctor'))) {
+    console.log('Dashboard: Routing to DoctorDashboard');
+    return <DoctorDashboard />;
+  }
+  
+  if (user?.role === 'lab_technician' || (hasRole && hasRole('lab_technician'))) {
+    return <LabTechnicianDashboard />;
+  }
 
   const handleLogout = async () => {
     await logout();

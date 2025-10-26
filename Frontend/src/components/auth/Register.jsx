@@ -12,47 +12,95 @@ const RegisterContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(84, 169, 234, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(132, 88, 253, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 `;
 
 const RegisterCard = styled(motion.div)`
   background: white;
-  border-radius: 20px;
-  padding: 40px;
+  border-radius: 24px;
+  padding: 48px;
   width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f3f4f6;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+    border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 32px 24px;
+  }
 `;
 
 const Logo = styled.div`
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 `;
 
 const LogoIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 15px;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 `;
 
 const Title = styled.h1`
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #2d3748;
-  margin: 0 0 5px;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  font-family: var(--font-family-heading);
 `;
 
 const Subtitle = styled.p`
-  color: #718096;
-  margin: 0 0 30px;
+  color: #6b7280;
+  margin: 0 0 32px;
+  font-size: 15px;
 `;
 
 const Form = styled.form`
@@ -86,80 +134,87 @@ const InputIcon = styled.div`
 
 const Input = styled.input`
   width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 16px 16px 16px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
   transition: all 0.3s ease;
-  background: #f7fafc;
+  background: #f9fafb;
+  font-family: var(--font-family-body);
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
     background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 
   &::placeholder {
-    color: #a0aec0;
+    color: #9ca3af;
   }
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 16px 16px 16px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
   transition: all 0.3s ease;
-  background: #f7fafc;
+  background: #f9fafb;
+  font-family: var(--font-family-body);
+  cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
     background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 `;
 
 const PasswordToggle = styled.button`
   position: absolute;
-  right: 15px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #a0aec0;
+  color: #9ca3af;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px;
+  transition: all 0.2s ease;
   
   &:hover {
-    color: #667eea;
+    color: #54a9ea;
   }
 `;
 
 const RegisterButton = styled(motion.button)`
   width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: var(--font-family-button);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(84, 169, 234, 0.4);
   }
 
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 `;
 
@@ -172,15 +227,17 @@ const ErrorMessage = styled.div`
 
 const LoginLink = styled.div`
   text-align: center;
-  margin-top: 20px;
-  color: #718096;
+  margin-top: 24px;
+  color: #6b7280;
+  font-size: 14px;
   
   a {
-    color: #667eea;
+    color: #54a9ea;
     text-decoration: none;
     font-weight: 600;
     
     &:hover {
+      color: #8458fd;
       text-decoration: underline;
     }
   }

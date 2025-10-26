@@ -166,6 +166,62 @@ class AppointmentService {
       };
     }
   }
+
+  // Download appointment medical record as PDF
+  async downloadAppointmentRecord(appointmentId) {
+    try {
+      const response = await api.get(`/appointments/${appointmentId}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `appointment-record-${appointmentId}.pdf`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      return {
+        success: true,
+        message: 'Appointment record downloaded successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to download appointment record'
+      };
+    }
+  }
+
+  // Get patient dashboard statistics
+  async getPatientDashboardStats() {
+    try {
+      const response = await api.get('/appointments/dashboard/stats');
+      return {
+        success: true,
+        data: response.data.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch dashboard statistics'
+      };
+    }
+  }
 }
 
 export default new AppointmentService();

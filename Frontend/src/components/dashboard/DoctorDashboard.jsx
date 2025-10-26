@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { 
-  Users, 
-  Calendar, 
-  FileText, 
-  Activity, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import {
+  Users,
+  Calendar,
+  FileText,
+  Activity,
   Heart,
   Clock,
   User,
@@ -18,13 +18,13 @@ import {
   Plus,
   Stethoscope,
   TrendingUp,
-  Award
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import appointmentService from '../../services/appointment.service';
-import doctorService from '../../services/doctor.service';
-import patientService from '../../services/patient.service';
-import LoadingSpinner from '../common/LoadingSpinner';
+  Award,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import appointmentService from "../../services/appointment.service";
+import doctorService from "../../services/doctor.service";
+import patientService from "../../services/patient.service";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const DashboardContainer = styled.div`
   max-width: 1400px;
@@ -32,60 +32,126 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeSection = styled(motion.div)`
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  color: white;
-  padding: 40px;
-  border-radius: 20px;
-  margin-bottom: 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--shadow-md);
+  background: white;
+  padding: 0;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
 `;
 
 const WelcomeContent = styled.div`
+  position: relative;
+  z-index: 1;
+  padding: 32px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 20px;
+  }
+`;
+
+const WelcomeLeft = styled.div`
   flex: 1;
 `;
 
 const WelcomeTitle = styled.h1`
-  font-size: 36px;
-  font-weight: 700;
-  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: #111827;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  letter-spacing: -0.3px;
+
+  svg {
+    color: #667eea;
+    stroke-width: 2;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
 const WelcomeSubtitle = styled.p`
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 14px;
+  color: #6b7280;
   margin: 0;
+  line-height: 1.5;
+  font-weight: 400;
+  max-width: 600px;
+`;
+
+const WelcomeRight = styled.div`
+  display: flex;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    margin-top: 24px;
+    width: 100%;
+  }
+`;
+
+const QuickStatCard = styled.div`
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 28px;
+  text-align: center;
+  min-width: 130px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (max-width: 768px) {
+    flex: 1;
+    min-width: auto;
+  }
+`;
+
+const QuickStatValue = styled.div`
+  font-size: 28px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 4px;
+`;
+
+const QuickStatLabel = styled.div`
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const TodayStats = styled.div`
-  display: flex;
-  gap: 30px;
-  align-items: center;
+  display: none;
 `;
 
 const TodayStat = styled.div`
-  text-align: center;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 15px 20px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: none;
 `;
 
 const TodayStatValue = styled.div`
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 5px;
+  display: none;
 `;
 
 const TodayStatLabel = styled.div`
-  font-size: 14px;
-  opacity: 0.9;
+  display: none;
 `;
 
 const StatsGrid = styled.div`
@@ -97,15 +163,16 @@ const StatsGrid = styled.div`
 
 const StatCard = styled(motion.div)`
   background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: var(--shadow-sm);
-  border-left: 4px solid ${props => props.color || 'var(--primary-color)'};
-  transition: all 0.3s ease;
-  
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: ${(props) => props.color || "var(--primary-color)"};
   }
 `;
 
@@ -117,14 +184,14 @@ const StatHeader = styled.div`
 `;
 
 const StatIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${props => props.color || 'var(--primary-color)'}20;
-  color: ${props => props.color || 'var(--primary-color)'};
+  background: ${(props) => props.color || "var(--primary-color)"}15;
+  color: ${(props) => props.color || "var(--primary-color)"};
 `;
 
 const StatTrend = styled.div`
@@ -132,7 +199,7 @@ const StatTrend = styled.div`
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: ${props => props.positive ? '#48bb78' : 'var(--danger-color)'};
+  color: ${(props) => (props.positive ? "#48bb78" : "var(--danger-color)")};
 `;
 
 const StatValue = styled.div`
@@ -152,7 +219,7 @@ const ContentGrid = styled.div`
   grid-template-columns: 2fr 1fr;
   gap: 30px;
   margin-bottom: 30px;
-  
+
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
   }
@@ -160,14 +227,10 @@ const ContentGrid = styled.div`
 
 const Section = styled.div`
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: var(--shadow-md);
-  }
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gray-200);
 `;
 
 const SectionHeader = styled.div`
@@ -178,13 +241,13 @@ const SectionHeader = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  color: var(--gray-800);
+  color: var(--gray-900);
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 `;
 
 const ViewAllButton = styled.button`
@@ -197,7 +260,7 @@ const ViewAllButton = styled.button`
   gap: 5px;
   font-size: 14px;
   font-weight: 500;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -212,17 +275,18 @@ const AppointmentsList = styled.div`
 const AppointmentItem = styled(motion.div)`
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background: var(--gray-50);
   border-radius: 10px;
-  border-left: 4px solid ${props => getStatusColor(props.status)};
+  border: 1px solid var(--gray-200);
+  border-left: 3px solid ${(props) => getStatusColor(props.status)};
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: var(--gray-100);
-    transform: translateX(5px);
-    box-shadow: var(--shadow-sm);
+    background: white;
+    border-color: ${(props) => getStatusColor(props.status)};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 `;
 
@@ -289,23 +353,28 @@ const PatientsList = styled.div`
 const PatientItem = styled(motion.div)`
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background: var(--gray-50);
   border-radius: 10px;
+  border: 1px solid var(--gray-200);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: var(--gray-100);
-    transform: translateX(5px);
-    box-shadow: var(--shadow-sm);
+    background: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const PatientAvatar = styled.div`
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -358,49 +427,51 @@ const EmptyState = styled.div`
 // Helper function to get status color
 const getStatusColor = (status) => {
   const colors = {
-    scheduled: 'var(--primary-color)',
-    confirmed: '#48bb78',
-    'in-progress': 'var(--warning-color)',
-    completed: 'var(--secondary-color)',
-    cancelled: 'var(--danger-color)',
-    'no-show': 'var(--gray-400)'
+    scheduled: "var(--primary-color)",
+    confirmed: "#48bb78",
+    "in-progress": "var(--warning-color)",
+    completed: "var(--secondary-color)",
+    cancelled: "var(--danger-color)",
+    "no-show": "var(--gray-400)",
   };
-  return colors[status] || 'var(--gray-500)';
+  return colors[status] || "var(--gray-500)";
 };
 
 // Helper function to format time
 const formatTime = (timeString) => {
-  if (!timeString) return 'TBD';
+  if (!timeString) return "TBD";
   return timeString;
 };
 
 // Helper function to format date
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    weekday: 'short',
-    month: 'short', 
-    day: 'numeric' 
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   });
 };
 
 // Helper function to get patient initials
 const getPatientInitials = (patient) => {
-  if (!patient) return 'P';
-  return `${patient.firstName?.[0] || ''}${patient.lastName?.[0] || ''}`.toUpperCase();
+  if (!patient) return "P";
+  return `${patient.firstName?.[0] || ""}${patient.lastName?.[0] || ""}`.toUpperCase();
 };
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false to show immediately
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [recentPatients, setRecentPatients] = useState([]);
   const [doctorStats, setDoctorStats] = useState({});
+  
+  console.log('DoctorDashboard: Component rendering, loading:', loading, 'user:', user);
 
   useEffect(() => {
     const fetchDoctorData = async () => {
-      setLoading(true);
+      console.log('DoctorDashboard: Fetching data for user:', user);
       try {
         // Fetch doctor stats
         const statsResult = await doctorService.getDoctorStats();
@@ -409,12 +480,13 @@ const DoctorDashboard = () => {
         }
 
         // Fetch today's appointments
-        const today = new Date().toISOString().split('T')[0];
-        const appointmentsResult = await appointmentService.getDoctorAppointments({
-          date: today,
-          limit: 5
-        });
-        
+        const today = new Date().toISOString().split("T")[0];
+        const appointmentsResult =
+          await appointmentService.getDoctorAppointments({
+            date: today,
+            limit: 5,
+          });
+
         if (appointmentsResult.success) {
           setTodayAppointments(appointmentsResult.data.appointments || []);
         }
@@ -422,15 +494,15 @@ const DoctorDashboard = () => {
         // Fetch recent patients
         const patientsResult = await patientService.getDoctorPatients({
           limit: 5,
-          sort: 'lastVisit'
+          sort: "lastVisit",
         });
-        
+
         if (patientsResult.success) {
           setRecentPatients(patientsResult.data.patients || []);
         }
       } catch (error) {
-        console.error('Failed to fetch doctor data:', error);
-        toast.error('Failed to load dashboard data');
+        console.error("Failed to fetch doctor data:", error);
+        toast.error("Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
@@ -442,34 +514,34 @@ const DoctorDashboard = () => {
   }, [user]);
 
   const dashboardStats = [
-    { 
-      icon: Calendar, 
-      label: 'Total Appointments', 
-      value: doctorStats.totalAppointments || '0', 
-      color: 'var(--primary-color)',
-      trend: { value: '+12%', positive: true }
+    {
+      icon: Calendar,
+      label: "Total Appointments",
+      value: doctorStats.totalAppointments || "0",
+      color: "var(--primary-color)",
+      trend: { value: "+12%", positive: true },
     },
-    { 
-      icon: Users, 
-      label: 'Total Patients', 
-      value: doctorStats.totalPatients || '0', 
-      color: 'var(--secondary-color)',
-      trend: { value: '+5%', positive: true }
+    {
+      icon: Users,
+      label: "Total Patients",
+      value: doctorStats.totalPatients || "0",
+      color: "var(--secondary-color)",
+      trend: { value: "+5%", positive: true },
     },
-    { 
-      icon: Activity, 
-      label: 'Completion Rate', 
-      value: doctorStats.completionRate || '95%', 
-      color: '#48bb78',
-      trend: { value: '+2%', positive: true }
+    {
+      icon: Activity,
+      label: "Completion Rate",
+      value: doctorStats.completionRate || "95%",
+      color: "#48bb78",
+      trend: { value: "+2%", positive: true },
     },
-    { 
-      icon: Award, 
-      label: 'Satisfaction Score', 
-      value: doctorStats.satisfactionScore || '4.8', 
-      color: 'var(--accent-color)',
-      trend: { value: '+0.2', positive: true }
-    }
+    {
+      icon: Award,
+      label: "Satisfaction Score",
+      value: doctorStats.satisfactionScore || "4.8",
+      color: "var(--accent-color)",
+      trend: { value: "+0.2", positive: true },
+    },
   ];
 
   if (loading) {
@@ -478,31 +550,45 @@ const DoctorDashboard = () => {
 
   return (
     <DashboardContainer>
+      {/* Debug: Ensure something renders */}
+      <div style={{ padding: '20px', background: 'white', margin: '20px', borderRadius: '8px' }}>
+        <h1>Doctor Dashboard</h1>
+        <p>User: Dr. {user?.lastName}</p>
+        <p>Loading: {loading ? 'Yes' : 'No'}</p>
+        <p>Today's Appointments: {doctorStats.todayAppointments || '0'}</p>
+      </div>
+      
       <WelcomeSection
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <WelcomeContent>
-          <WelcomeTitle>
-            <Stethoscope size={40} />
-            Welcome, Dr. {user?.lastName}!
-          </WelcomeTitle>
-          <WelcomeSubtitle>
-            You have {todayAppointments.length} appointments scheduled for today.
-          </WelcomeSubtitle>
+          <WelcomeLeft>
+            <WelcomeTitle>
+              <Stethoscope size={32} strokeWidth={2} />
+              Welcome back, Dr. {user?.lastName}!
+            </WelcomeTitle>
+            <WelcomeSubtitle>
+              Here's what's happening in your doctor dashboard today.
+            </WelcomeSubtitle>
+          </WelcomeLeft>
+
+          <WelcomeRight>
+            <QuickStatCard>
+              <QuickStatValue>
+                {doctorStats.todayAppointments || "0"}
+              </QuickStatValue>
+              <QuickStatLabel>Today</QuickStatLabel>
+            </QuickStatCard>
+            <QuickStatCard>
+              <QuickStatValue>
+                {doctorStats.totalPatients || "0"}
+              </QuickStatValue>
+              <QuickStatLabel>Patients</QuickStatLabel>
+            </QuickStatCard>
+          </WelcomeRight>
         </WelcomeContent>
-        
-        <TodayStats>
-          <TodayStat>
-            <TodayStatValue>{doctorStats.todayAppointments || '0'}</TodayStatValue>
-            <TodayStatLabel>Today's Appointments</TodayStatLabel>
-          </TodayStat>
-          <TodayStat>
-            <TodayStatValue>{doctorStats.pendingReports || '0'}</TodayStatValue>
-            <TodayStatLabel>Pending Reports</TodayStatLabel>
-          </TodayStat>
-        </TodayStats>
       </WelcomeSection>
 
       <StatsGrid>
@@ -538,11 +624,11 @@ const DoctorDashboard = () => {
               <Calendar size={20} />
               Today's Appointments
             </SectionTitle>
-            <ViewAllButton onClick={() => navigate('/appointments')}>
+            <ViewAllButton onClick={() => navigate("/appointments")}>
               <Eye size={16} /> View All
             </ViewAllButton>
           </SectionHeader>
-          
+
           {todayAppointments.length > 0 ? (
             <AppointmentsList>
               {todayAppointments.map((appointment, index) => (
@@ -557,24 +643,29 @@ const DoctorDashboard = () => {
                   <AppointmentTime>
                     {formatTime(appointment.appointmentTime)}
                   </AppointmentTime>
-                  
+
                   <AppointmentInfo>
                     <PatientName>
-                      {appointment.patient?.firstName} {appointment.patient?.lastName}
+                      {appointment.patient?.firstName}{" "}
+                      {appointment.patient?.lastName}
                     </PatientName>
                     <AppointmentDetails>
                       {appointment.type} • {appointment.status}
                     </AppointmentDetails>
                   </AppointmentInfo>
-                  
+
                   <AppointmentActions>
-                    <ActionButton onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/medical-records/new?patientId=${appointment.patient?._id}`);
-                    }}>
+                    <ActionButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(
+                          `/medical-records/new?patientId=${appointment.patient?._id}`,
+                        );
+                      }}
+                    >
                       Add Notes
                     </ActionButton>
-                    <ActionButton 
+                    <ActionButton
                       className="primary"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -602,11 +693,11 @@ const DoctorDashboard = () => {
               <Users size={20} />
               Recent Patients
             </SectionTitle>
-            <ViewAllButton onClick={() => navigate('/patients')}>
+            <ViewAllButton onClick={() => navigate("/patients")}>
               <Eye size={16} /> View All
             </ViewAllButton>
           </SectionHeader>
-          
+
           {recentPatients.length > 0 ? (
             <PatientsList>
               {recentPatients.map((patient, index) => (
@@ -617,10 +708,8 @@ const DoctorDashboard = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <PatientAvatar>
-                    {getPatientInitials(patient)}
-                  </PatientAvatar>
-                  
+                  <PatientAvatar>{getPatientInitials(patient)}</PatientAvatar>
+
                   <PatientInfo>
                     <PatientName>
                       {patient.firstName} {patient.lastName}

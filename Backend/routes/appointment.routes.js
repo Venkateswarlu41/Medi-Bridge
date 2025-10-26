@@ -94,6 +94,12 @@ router.get('/', getAllAppointments);
 
 router.get('/availability', availabilityValidation, getDoctorAvailability);
 
+// Get patient dashboard statistics (must come before /:id routes)
+router.get('/dashboard/stats', 
+  authorizeRoles('patient'), 
+  require('../controllers/appointment.controller').getPatientDashboardStats
+);
+
 // Specific appointment routes should come after general routes to avoid conflicts
 router.get('/:id', authorizeAppointmentAccess, getAppointmentById);
 
@@ -119,6 +125,12 @@ router.delete('/:id',
   authorizeAppointmentAccess,
   body('reason').optional().isLength({ max: 500 }),
   cancelAppointment
+);
+
+// Download appointment medical history as PDF
+router.get('/:id/download', 
+  authorizeAppointmentAccess,
+  require('../controllers/appointment.controller').downloadAppointmentRecord
 );
 
 module.exports = router;

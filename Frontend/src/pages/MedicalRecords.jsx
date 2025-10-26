@@ -29,54 +29,80 @@ import { useAuth } from '../context/AuthContext';
 import { format, parseISO } from 'date-fns';
 
 const PageContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 40px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+  }
 `;
 
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
 `;
 
 const PageTitle = styled.h1`
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
-  color: #2d3748;
+  color: #1a1a1a;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  font-family: var(--font-family-heading);
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-left: 8px;
+  }
 `;
 
 const AddButton = styled(motion.button)`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: var(--font-family-button);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(84, 169, 234, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(84, 169, 234, 0.4);
   }
 `;
 
 const FiltersContainer = styled.div`
   background: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
+  margin-bottom: 32px;
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
   flex-wrap: wrap;
 `;
@@ -89,73 +115,105 @@ const SearchContainer = styled.div`
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 12px 15px 12px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
   transition: all 0.3s ease;
+  background: #f9fafb;
+  font-family: var(--font-family-body);
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
   }
 `;
 
 const SearchIcon = styled.div`
   position: absolute;
-  left: 15px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a0aec0;
+  color: #9ca3af;
 `;
 
 const FilterSelect = styled.select`
-  padding: 12px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #f9fafb;
   cursor: pointer;
+  font-family: var(--font-family-body);
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 `;
 
 const DateInput = styled.input`
-  padding: 12px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #f9fafb;
   cursor: pointer;
+  font-family: var(--font-family-body);
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #54a9ea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(84, 169, 234, 0.1);
   }
 `;
 
 const RecordsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const RecordCard = styled(motion.div)`
   background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid ${props => getRecordTypeColor(props.recordType)};
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${props => getRecordTypeColor(props.recordType)};
+  }
+
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(84, 169, 234, 0.12);
+    border-color: rgba(84, 169, 234, 0.2);
   }
 `;
 
@@ -163,7 +221,7 @@ const RecordHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 `;
 
 const RecordInfo = styled.div`
@@ -171,34 +229,43 @@ const RecordInfo = styled.div`
 `;
 
 const RecordId = styled.div`
-  font-size: 14px;
-  color: #718096;
-  margin-bottom: 5px;
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  font-weight: 500;
 `;
 
 const RecordTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 5px;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  font-family: var(--font-family-heading);
+  line-height: 1.3;
 `;
 
 const RecordDate = styled.div`
   font-size: 14px;
-  color: #4a5568;
+  color: #6b7280;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-weight: 500;
 `;
 
 const RecordType = styled.div`
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  background: ${props => getRecordTypeColor(props.type)}20;
-  color: ${props => getRecordTypeColor(props.type)};
+  background: ${props => getRecordTypeColor(props.type)};
+  color: white;
+  box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 `;
 
 const RecordDetails = styled.div`
@@ -215,20 +282,26 @@ const DetailRow = styled.div`
 `;
 
 const DiagnosisSection = styled.div`
-  background: #f7fafc;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+  background: linear-gradient(135deg, rgba(84, 169, 234, 0.05) 0%, rgba(132, 88, 253, 0.05) 100%);
+  padding: 18px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  border: 2px solid rgba(84, 169, 234, 0.1);
 `;
 
 const SectionTitle = styled.h4`
   font-size: 14px;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 10px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-family-heading);
+
+  svg {
+    color: #54a9ea;
+  }
 `;
 
 const DiagnosisList = styled.ul`
@@ -239,12 +312,14 @@ const DiagnosisList = styled.ul`
 
 const DiagnosisItem = styled.li`
   background: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 5px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
   font-size: 14px;
-  color: #4a5568;
-  border-left: 3px solid #667eea;
+  color: #1a1a1a;
+  border-left: 3px solid #54a9ea;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 `;
 
 const PrescriptionsList = styled.div`
@@ -254,12 +329,13 @@ const PrescriptionsList = styled.div`
 `;
 
 const PrescriptionTag = styled.span`
-  background: #e6fffa;
-  color: #00695c;
-  padding: 4px 8px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  padding: 6px 12px;
+  border-radius: 10px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  border: 2px solid #6ee7b7;
 `;
 
 const LabTestsList = styled.div`
@@ -269,67 +345,80 @@ const LabTestsList = styled.div`
 `;
 
 const LabTestTag = styled.span`
-  background: #fff5e6;
-  color: #e65100;
-  padding: 4px 8px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  color: #7c2d12;
+  padding: 6px 12px;
+  border-radius: 10px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  border: 2px solid #fb923c;
 `;
 
 const RecordActions = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
   flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #f3f4f6;
 `;
 
 const ActionButton = styled(motion.button)`
-  padding: 8px 12px;
-  border: 2px solid #e2e8f0;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
-  color: #4a5568;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
   transition: all 0.3s ease;
+  font-weight: 600;
+  font-family: var(--font-family-button);
 
   &:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #54a9ea;
+    color: #54a9ea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.15);
   }
 
   &.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #54a9ea 0%, #8458fd 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(84, 169, 234, 0.3);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 6px 20px rgba(84, 169, 234, 0.4);
     }
   }
 
   &.success {
-    background: #48bb78;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 
     &:hover {
-      background: #38a169;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     }
   }
 
   &.warning {
-    background: #ed8936;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: white;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 
     &:hover {
-      background: #dd7116;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
     }
   }
 `;
@@ -399,14 +488,14 @@ const EmptyState = styled.div`
 // Helper function to get record type color
 const getRecordTypeColor = (type) => {
   const colors = {
-    consultation: '#667eea',
-    'follow-up': '#48bb78',
-    emergency: '#e53e3e',
-    'routine-checkup': '#38b2ac',
-    procedure: '#ed8936',
-    'lab-result': '#9f7aea'
+    consultation: 'linear-gradient(135deg, #54a9ea 0%, #8458fd 100%)',
+    'follow-up': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    emergency: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    'routine-checkup': 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+    procedure: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    'lab-result': 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
   };
-  return colors[type] || '#718096';
+  return colors[type] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
 };
 
 // Helper function to get record type icon
@@ -520,9 +609,14 @@ const MedicalRecords = () => {
 
   const downloadRecord = async (recordId) => {
     try {
-      // Implementation for downloading record as PDF
-      toast.success('Record download started');
+      const result = await medicalRecordService.downloadMedicalRecord(recordId);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
+      console.error('Download error:', error);
       toast.error('Failed to download record');
     }
   };

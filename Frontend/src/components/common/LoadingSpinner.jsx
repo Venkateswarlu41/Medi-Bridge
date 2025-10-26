@@ -18,12 +18,13 @@ const LoadingContainer = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.98) 100%);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: var(--z-modal);
 `;
 
 const SpinnerWrapper = styled.div`
@@ -31,27 +32,32 @@ const SpinnerWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: var(--spacing-8);
 `;
 
 const Spinner = styled.div`
-  width: 60px;
-  height: 60px;
-  border: 4px solid #e2e8f0;
-  border-top: 4px solid #667eea;
+  width: 80px;
+  height: 80px;
+  border: 4px solid var(--primary-100);
+  border-top: 4px solid var(--primary-600);
   border-radius: 50%;
-  animation: ${spin} 1s linear infinite;
+  animation: ${spin} 1.2s linear infinite;
+  box-shadow: var(--shadow-sm);
 `;
 
 const HeartIcon = styled.div`
   position: absolute;
-  animation: ${pulse} 2s ease-in-out infinite;
+  animation: ${pulse} 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(14, 165, 233, 0.3));
 `;
 
 const LoadingText = styled.div`
-  margin-top: 20px;
-  color: #4a5568;
-  font-size: 16px;
-  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  max-width: 300px;
+  line-height: var(--line-height-relaxed);
 `;
 
 const LoadingSpinner = ({ text = 'Loading...' }) => {
@@ -60,7 +66,7 @@ const LoadingSpinner = ({ text = 'Loading...' }) => {
       <SpinnerWrapper>
         <Spinner />
         <HeartIcon>
-          <Heart size={24} color="#667eea" fill="#667eea" />
+          <Heart size={32} color="#0ea5e9" fill="#0ea5e9" />
         </HeartIcon>
       </SpinnerWrapper>
       <LoadingText>{text}</LoadingText>
